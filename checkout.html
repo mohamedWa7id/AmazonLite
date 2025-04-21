@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Checkout</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f3f3f3;
+        }
+
+        .header {
+            background-color: #0b1420;
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            width: 100px;
+            height: 30px;
+            margin-right: 20px;
+        }
+
+        .checkout-container {
+            display: flex;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        .delivery-address,
+        .order-summary {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .order-summary {
+            flex: 1;
+        }
+
+        h2 {
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .checkout-button,
+        .clear-cart-button {
+            border: none;
+            padding: 10px;
+            width: 100%;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .checkout-button {
+            background-color: #FFD814;
+        }
+
+        .clear-cart-button {
+            background-color: #ff6b6b;
+            color: white;
+        }
+
+        .cart-item {
+            display: flex;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+        }
+
+        .cart-item-image {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            margin-right: 15px;
+        }
+
+        .cart-item-details {
+            flex: 1;
+        }
+
+        .cart-item-price {
+            font-weight: bold;
+            color: #B12704;
+        }
+
+        .total {
+            font-size: 18px;
+            font-weight: bold;
+            text-align: right;
+            margin-top: 20px;
+        }
+
+        .empty-cart {
+            text-align: center;
+            padding: 40px;
+            font-size: 18px;
+            color: #555;
+        }
+
+        .empty-cart a {
+            color: #0066c0;
+            text-decoration: none;
+        }
+
+        .empty-cart a:hover {
+            text-decoration: underline;
+        }
+
+        .remove-item {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+
+        .cart-img {
+            width: 30px;
+            height: 25px;
+            margin-right: 5px;
+        }
+
+        .cart-link {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: white;
+            padding: 5px;
+        }
+
+        .cart-link:hover {
+            outline: 1px solid white;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <img class="amazon-logo logo" src="images/amazon-logo-white.png">
+        <div style="flex-grow: 1;"></div>
+        <div>Account</div>
+        <div>Orders</div>
+        <a href="checkout.html" class="cart-link">
+            <img class="cart-icon cart-img" src="images/icons/cart-icon.png">
+            <span class="cart-text">Cart <span class="cart-quantity js-cart-quantity">0</span></span>
+        </a>
+    </div>
+
+    <div class="checkout-container">
+        <div class="delivery-address">
+            <h2>Delivery address</h2>
+            <div class="form-group">
+                <label>Full name</label>
+                <input type="text" placeholder="First and last name">
+            </div>
+            <div class="form-group">
+                <label>Address</label>
+                <input type="text" placeholder="Street address or P.O. Box">
+            </div>
+            <div class="form-group">
+                <label>City</label>
+                <input type="text">
+            </div>
+            <div class="form-group">
+                <label>Phone number</label>
+                <input type="tel">
+            </div>
+
+            <h2>Payment method</h2>
+            <div class="form-group">
+                <label>Card number</label>
+                <input type="text" placeholder="1234 5678 9012 3456">
+            </div>
+            <div class="form-group">
+                <label>Name on card</label>
+                <input type="text">
+            </div>
+            <div class="form-group" style="display: flex; gap: 10px;">
+                <div style="flex: 1;">
+                    <label>Expiration date</label>
+                    <input type="text" placeholder="MM/YY">
+                </div>
+                <div style="flex: 1;">
+                    <label>Security code</label>
+                    <input type="text" placeholder="CVC">
+                </div>
+            </div>
+        </div>
+
+        <div class="order-summary js-order-summary">
+            <!-- Cart items will be inserted here -->
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Load cart from localStorage
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const orderSummary = document.querySelector('.js-order-summary');
+
+            function renderCartItems() {
+                if (cart.length === 0) {
+                    orderSummary.innerHTML = `
+                        <div class="empty-cart">
+                            Your cart is empty. <a href="simple_Amazon.html">Continue shopping</a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                let html = '<h2>Order Summary</h2>';
+                let total = 0;
+
+                cart.forEach(item => {
+                    const itemTotal = item.price * item.quantity;
+                    total += itemTotal;
+
+                    html += `
+                        <div class="cart-item">
+                            <img src="${item.image}" class="cart-item-image">
+                            <div class="cart-item-details">
+                                <div class="cart-item-name">${item.name}</div>
+                                <div class="cart-item-price">$${item.price.toFixed(2)}</div>
+                                <div>Quantity: ${item.quantity}</div>
+                                <button class="remove-item" data-product-id="${item.id}">Remove</button>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `
+                    <div class="total">
+                        Order Total: $${total.toFixed(2)}
+                    </div>
+                    <button class="checkout-button">Place Order</button>
+                    <button class="clear-cart-button">Clear Cart</button>
+                `;
+
+                orderSummary.innerHTML = html;
+            }
+
+            function updateCartCount() {
+                const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+                document.querySelector('.js-cart-quantity').textContent = totalItems;
+            }
+
+            // Event delegation for dynamic buttons
+            document.addEventListener('click', function (e) {
+                // Place order
+                if (e.target.classList.contains('checkout-button')) {
+                    alert('Order placed successfully!');
+                    localStorage.removeItem('cart');
+                    window.location.href = 'simple_Amazon.html';
+                }
+
+                // Clear cart
+                if (e.target.classList.contains('clear-cart-button')) {
+
+                    localStorage.removeItem('cart');
+                    window.location.reload();
+
+                }
+
+                // Remove single item
+                if (e.target.classList.contains('remove-item')) {
+                    const productId = e.target.dataset.productId;
+                    cart = cart.filter(item => item.id !== productId);
+                    localStorage.setItem('cart', JSON.stringify(cart));
+                    renderCartItems();
+                    updateCartCount();
+                }
+            });
+
+            // Initialize
+            renderCartItems();
+            updateCartCount();
+        });
+    </script>
+    <footer style="text-align: center; padding: 20px; background-color: #f3f3f3; margin-top: 30px;">
+        <p>Made by <strong>Mohamed Wahid </strong></p>
+    </footer>
+</body>
+
+</html>
